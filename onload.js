@@ -1,4 +1,22 @@
 onload = async function () {
+  const using_layers = ["railway", "road", "building", "waterarea"];
+  const layer_styles = {
+    structurel: { lineWidth: 2, strokeStyle: "rgba(150,150,50,1)" },
+    building: {
+      lineWidth: 1,
+      strokeStyle: "rgba(200,100,100,0)",
+      fillStyle: "rgba(200,100,100,1)",
+    },
+    structurea: {
+      lineWidth: 1,
+      strokeStyle: "rgba(200,100,100,0)",
+      fillStyle: "rgba(200,100,100,1)",
+    },
+    railway: { lineWidth: 4, strokeStyle: "rgba(150,200,150,1)" },
+    waterarea: { fillStyle: "rgba(150,150,200,1)" },
+    lake: { fillStyle: "rgba(150,150,200,1)" },
+  };
+
   const gsiv = new GSIV();
   await gsiv.loadProto();
   console.log(gsiv);
@@ -16,21 +34,25 @@ onload = async function () {
       // ctx.fillStyle = "rgb(150,150,180)";
       // ctx.fillRect(0, 0, tile.width, tile.height);
       gsiv
-        .loadTile(coords.z - 1, coords.x, coords.y)
+        .loadTile(coords.z - 1, coords.x, coords.y, using_layers)
         .then((data) => {
           const layers = data.layers;
           ctx.fillStyle = "rgb(250,250,250)";
           ctx.fillRect(0, 0, tile.width, tile.height);
           // ! Change flow
-          // layers.foreach()
-          if (layers.waterarea) gsiv.draw(tile, layers.waterarea);
-          if (layers.lake) gsiv.draw(tile, layers.lake);
-          if (layers.river) gsiv.draw(tile, layers.river);
-          if (layers.railway) gsiv.draw(tile, layers.railway);
-          if (layers.structurea) gsiv.draw(tile, layers.structurea);
-          if (layers.building) gsiv.draw(tile, layers.building);
-          if (layers.road) gsiv.draw(tile, layers.road);
-          if (layers.structurel) gsiv.draw(tile, layers.structurel);
+          // layers.foreach((layer) => {
+          //  if(styles[layer.name]) gsiv.draw(tile, layer, styles[layer.name]);
+          // });
+          if (layers.waterarea) gsiv.draw(tile, layers.waterarea, layer_styles);
+          if (layers.lake) gsiv.draw(tile, layers.lake, layer_styles);
+          if (layers.river) gsiv.draw(tile, layers.river, layer_styles);
+          if (layers.railway) gsiv.draw(tile, layers.railway, layer_styles);
+          if (layers.structurea)
+            gsiv.draw(tile, layers.structurea, layer_styles);
+          if (layers.building) gsiv.draw(tile, layers.building, layer_styles);
+          if (layers.road) gsiv.draw(tile, layers.road, layer_styles);
+          if (layers.structurel)
+            gsiv.draw(tile, layers.structurel, layer_styles);
           done(error, tile);
         })
         .catch((e) => {
