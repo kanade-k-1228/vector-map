@@ -13,10 +13,8 @@ class GSIV {
       const req = new XMLHttpRequest();
       req.open("get", path, true);
       req.responseType = "arraybuffer";
-      req.onload = () => {
-        if (req.status == 200) resolve(req.response);
-        else reject("file cannot load");
-      };
+      req.onload = () =>
+        req.status == 200 ? resolve(req.response) : reject("file cannot load");
       req.send();
     });
 
@@ -34,9 +32,7 @@ class GSIV {
           console.log(layers);
           resolve({ zoom: zoom, tilex: x, tiley: y, layers: layers });
         })
-        .catch((r) => {
-          reject("cannot load tile");
-        });
+        .catch((r) => reject("cannot load tile"));
     });
 
   draw(can, layer) {
@@ -45,8 +41,8 @@ class GSIV {
     const ext = layer.extent;
     const ctx = can.getContext("2d");
     let lc = 0;
-    const wx = can.width / ext,
-      wy = can.height / ext; // axis scale
+    const wx = can.width / ext;
+    const wy = can.height / ext;
     for (let i in layer.features) {
       //decode tags
       const tags = layer.features[i].tags;

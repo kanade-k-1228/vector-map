@@ -21,6 +21,8 @@ onload = async function () {
           const layers = data.layers;
           ctx.fillStyle = "rgb(250,250,250)";
           ctx.fillRect(0, 0, tile.width, tile.height);
+          // ! Change flow
+          // layers.foreach()
           if (layers.waterarea) gsiv.draw(tile, layers.waterarea);
           if (layers.lake) gsiv.draw(tile, layers.lake);
           if (layers.river) gsiv.draw(tile, layers.river);
