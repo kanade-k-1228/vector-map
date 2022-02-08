@@ -1,6 +1,15 @@
 class GSIV {
-  static load(path) {
-    return new Promise(function (resolve, reject) {
+  loadProto = () =>
+    new Promise((resolve, reject) => {
+      protobuf.load("vector_tile.proto", (err, root) => {
+        if (err) reject(err);
+        this.tile = root.lookupType("vector_tile.Tile");
+        resolve(this);
+      });
+    });
+
+  static load = (path) =>
+    new Promise((resolve, reject) => {
       const req = new XMLHttpRequest();
       req.open("get", path, true);
       req.responseType = "arraybuffer";
@@ -10,31 +19,18 @@ class GSIV {
       };
       req.send();
     });
-  }
 
-  init() {
-    return new Promise((resolve, reject) => {
-      //get Mapbox scheme
-      protobuf.load("vector_tile.proto", (err, root) => {
-        if (err) reject(err);
-        this.tile = root.lookupType("vector_tile.Tile");
-        resolve(this);
-      });
-    });
-  }
-
-  loadtile(zoom, x, y) {
-    const tilepath = `https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/${zoom}/${x}/${y}.pbf`;
-    return new Promise((resolve, reject) => {
-      GSIV.load(tilepath)
-        .then((v) => {
-          const buf = new Uint8Array(v);
-          const msg = this.tile.decode(buf); //decode Protocol Buffers
-          const obj = this.tile.toObject(msg); //convert to Object
+  loadTile = (zoom, x, y) =>
+    new Promise((resolve, reject) => {
+      GSIV.load(
+        `https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/${zoom}/${x}/${y}.pbf`
+      )
+        .then((plain) => {
+          const buf = new Uint8Array(plain);
+          const msg = this.tile.decode(buf);
+          const obj = this.tile.toObject(msg);
           const layers = {};
-          for (let l of obj.layers) {
-            layers[l.name] = l;
-          }
+          for (let l of obj.layers) layers[l.name] = l;
           console.log(layers);
           resolve({ zoom: zoom, tilex: x, tiley: y, layers: layers });
         })
@@ -42,17 +38,12 @@ class GSIV {
           reject("cannot load tile");
         });
     });
-  }
 
-  //draw road map
   draw(can, layer) {
-    function decodeint(value) {
-      return (value >> 1) ^ -(value & 1);
-    }
+    const decodeint = (value) => (value >> 1) ^ -(value & 1);
     //console.log(layer)
     const ext = layer.extent;
     const ctx = can.getContext("2d");
-
     let lc = 0;
     const wx = can.width / ext,
       wy = can.height / ext; // axis scale
@@ -65,7 +56,6 @@ class GSIV {
         attr[layer.keys[tags[i]]] = layer.values[tags[i + 1]];
       }
       //		console.log(attr)
-
       switch (layer.name) {
         case "road":
           ctx.lineWidth = attr.rnkWidth ? attr.rnkWidth.intValue + 1 : 1;
