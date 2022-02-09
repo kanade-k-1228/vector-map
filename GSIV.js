@@ -18,7 +18,7 @@ class GSIV {
       req.send();
     });
 
-  loadTile = (z, x, y, using_layers) =>
+  loadTile = (z, x, y, usingLayers) =>
     new Promise((resolve, reject) => {
       GSIV.load(
         `https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/${z}/${x}/${y}.pbf`
@@ -27,14 +27,13 @@ class GSIV {
           const buf = new Uint8Array(plain);
           const msg = this.tile.decode(buf);
           const obj = this.tile.toObject(msg);
+          // console.log(obj.layers.map((layer) => layer.name));
           const layers = {};
-          const layer_names_for_dbug = [];
-          // filter layer
-          for (let layer of obj.layers) {
-            layer_names_for_dbug.push(layer.name);
-            if (using_layers.includes(layer.name)) layers[layer.name] = layer;
-          }
-          console.log(layer_names_for_dbug);
+          obj.layers
+            .filter((layer) => usingLayers.includes(layer.name))
+            .forEach((layer) => {
+              layers[layer.name] = layer;
+            });
           resolve({ zoom: z, tilex: x, tiley: y, layers: layers });
         })
         .catch((r) => reject("cannot load tile"));
@@ -55,30 +54,12 @@ class GSIV {
       for (let i = 0; i < tags.length; i += 2) {
         attr[layer.keys[tags[i]]] = layer.values[tags[i + 1]];
       }
-
-      //   console.log(attr);
-      // Set Default
-      {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(0,0,0,0.5)";
-        ctx.fillStyle = "rgba(100,100,200,1)";
-      }
-      if (style[layer.name].lineWidth)
-        ctx.lineWidth = style[layer.name].lineWidth;
-      if (style[layer.name].strokeStyle)
-        ctx.strokeStyle = style[layer.name].strokeStyle;
-      if (style[layer.name].fillStyle)
-        ctx.fillStyle = style[layer.name].fillStyle;
-      switch (layer.name) {
-        case "waterarea":
-        case "lake":
-          ctx.fillStyle = "rgba(150,150,200,1)";
-          break;
-        case "contour":
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = "rgba(100,50,50,0.5)";
-          break;
-      }
+      // console.log(attr);
+      ctx.lineWidth = style.lineWidth ? style.lineWidth : 1;
+      ctx.strokeStyle = style.strokeStyle
+        ? style.strokeStyle
+        : "rgba(0,0,0,0.5)";
+      ctx.fillStyle = style.fillStyle ? style.fillStyle : "rgba(100,100,200,1)";
       //decode geometory
       const geo = layer.features[i].geometry;
       let gi = 0;
@@ -86,7 +67,7 @@ class GSIV {
       let cy = 0;
       let sx = 0;
       let sy = 0;
-      //		ctx.lineWidth = attr.rnkWidth.intValue + 1
+      // ctx.lineWidth = attr.rnkWidth.intValue + 1;
       ctx.beginPath();
       while (gi < geo.length) {
         let c = geo[gi++];
