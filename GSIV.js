@@ -72,15 +72,15 @@ class GSIV {
       ctx.beginPath();
       while (gi < geo.length) {
         let c = geo[gi++];
-        let cmd = c & 7; //command
+        let command = c & 7;
         let count = c >> 3; //count
-        switch (cmd) {
+        switch (command) {
           case 1: //moveto
             for (let i = 0; i < count; i++) {
               cx = cx + decodeint(geo[gi]);
               cy = cy + decodeint(geo[gi + 1]);
               ctx.moveTo(cx * wx, cy * wy);
-              //						console.log("move "+ cx+"x"+cy)
+              // console.log("move " + cx + "x" + cy);
             }
             (sx = cx), (sy = cy);
             gi += count * 2;
@@ -91,7 +91,7 @@ class GSIV {
               cy += decodeint(geo[gi++]);
               ctx.lineTo(cx * wx, cy * wy);
               lc++;
-              //						console.log("line "+cx+"x"+cy)
+              // console.log("line " + cx + "x" + cy);
             }
             break;
           case 7: //close
@@ -109,42 +109,3 @@ class GSIV {
     return lc;
   }
 }
-
-const decodeGeometory = (ctx) => {
-  ctx.beginPath();
-  while (gi < geo.length) {
-    let c = geo[gi++];
-    let cmd = c & 7;
-    let count = c >> 3;
-    switch (cmd) {
-      case 1: //moveto
-        for (let i = 0; i < count; i++) {
-          cx = cx + decodeint(geo[gi]);
-          cy = cy + decodeint(geo[gi + 1]);
-          ctx.moveTo(cx * wx, cy * wy);
-          //   console.log("move " + cx + "x" + cy);
-        }
-        (sx = cx), (sy = cy);
-        gi += count * 2;
-        break;
-      case 2: //liento
-        for (let i = 0; i < count; i++) {
-          cx += decodeint(geo[gi++]);
-          cy += decodeint(geo[gi++]);
-          ctx.lineTo(cx * wx, cy * wy);
-          lc++;
-          //   console.log("line " + cx + "x" + cy);
-        }
-        break;
-      case 7: //close
-        ctx.lineTo(sx * wx, sy * wy);
-        ctx.moveTo(cx * wx, cy * wy);
-        lc++;
-        break;
-      default:
-        console.log("illigal command");
-    }
-  }
-  if (type == 3) ctx.fill();
-  else ctx.stroke();
-};
