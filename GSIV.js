@@ -34,13 +34,13 @@ class GSIV {
             .forEach((layer) => {
               layers[layer.name] = layer;
             });
+          console.log(layers);
           resolve({ zoom: z, tilex: x, tiley: y, layers: layers });
         })
         .catch((r) => reject("cannot load tile"));
     });
 
   draw(can, layer, style) {
-    const decodeint = (value) => (value >> 1) ^ -(value & 1);
     const ext = layer.extent;
     const ctx = can.getContext("2d");
     let lc = 0;
@@ -61,6 +61,7 @@ class GSIV {
         : "rgba(0,0,0,0.5)";
       ctx.fillStyle = style.fillStyle ? style.fillStyle : "rgba(100,100,200,1)";
       //decode geometory
+      const decodeint = (value) => (value >> 1) ^ -(value & 1);
       const geo = layer.features[i].geometry;
       let gi = 0;
       let cx = 0;
